@@ -1,327 +1,231 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>로또 번호 추첨기</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>뽀식이 소개</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: linear-gradient(135deg, #fff3d6, #ffe1e8);
+      color: #333;
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      color: #fff;
-      padding: 40px 16px;
+      align-items: center;
+      padding: 30px;
     }
 
-    .container {
-      text-align: center;
-      max-width: 680px;
+    .card {
       width: 100%;
+      max-width: 900px;
+      background: #ffffff;
+      border-radius: 30px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
     }
 
-    h1 { font-size: 2.6rem; margin-bottom: 6px; letter-spacing: 2px; }
-
-    .subtitle { color: #aaa; font-size: 1rem; margin-bottom: 36px; }
-
-    /* 5세트 목록 */
-    .sets-wrap {
+    .image-box {
+      background: #ffd36e;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      margin-bottom: 36px;
-      min-height: 60px;
-    }
-
-    .placeholder {
-      color: #555;
-      font-size: 1rem;
-      margin: 20px 0;
-    }
-
-    /* 한 세트 행 */
-    .set-row {
-      background: rgba(255,255,255,0.05);
-      border-radius: 16px;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-
-    .set-row.show { opacity: 1; transform: translateY(0); }
-
-    .set-label {
-      font-size: 0.8rem;
-      color: #aaa;
-      min-width: 32px;
-      font-weight: 600;
-    }
-
-    .balls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      flex: 1;
-    }
-
-    .ball {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 1rem;
-      font-weight: 700;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.35);
-      color: #fff;
-      transform: scale(0);
-      transition: transform 0.25s ease;
+      align-items: center;
+      padding: 40px;
+      text-align: center;
     }
 
-    .ball.show { transform: scale(1); }
-
-    .ball.range1 { background: radial-gradient(circle at 35% 35%, #f7b731, #e55039); }
-    .ball.range2 { background: radial-gradient(circle at 35% 35%, #74b9ff, #0984e3); }
-    .ball.range3 { background: radial-gradient(circle at 35% 35%, #fd79a8, #e84393); }
-    .ball.range4 { background: radial-gradient(circle at 35% 35%, #55efc4, #00b894); }
-    .ball.range5 { background: radial-gradient(circle at 35% 35%, #a29bfe, #6c5ce7); }
-
-    .bonus-sep { color: #ffd32a; font-weight: 700; font-size: 1rem; }
-
-    .ball.bonus {
-      background: radial-gradient(circle at 35% 35%, #636e72, #2d3436);
-      border: 2px solid #ffd32a;
+    .dog-face {
+      width: 190px;
+      height: 190px;
+      background: #c9853f;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.08);
     }
 
-    /* 버튼 */
-    .btn-draw {
-      background: linear-gradient(135deg, #f7b731, #e55039);
-      border: none;
-      color: #fff;
-      font-size: 1.15rem;
-      font-weight: 700;
-      padding: 15px 48px;
+    .ear {
+      width: 70px;
+      height: 100px;
+      background: #a86632;
       border-radius: 50px;
-      cursor: pointer;
-      letter-spacing: 1px;
-      box-shadow: 0 6px 20px rgba(229, 80, 57, 0.4);
-      transition: transform 0.15s, box-shadow 0.15s;
+      position: absolute;
+      top: 35px;
     }
 
-    .btn-draw:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(229,80,57,0.5); }
-    .btn-draw:active { transform: translateY(0); }
-    .btn-draw:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .ear.left { left: -35px; }
+    .ear.right { right: -35px; }
 
-    /* 추첨 기록 */
-    .history { margin-top: 48px; text-align: left; }
-
-    .history h2 {
-      font-size: 1rem;
-      color: #aaa;
-      margin-bottom: 14px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 8px;
-    }
-
-    .history-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 260px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      background: rgba(255,255,255,0.04);
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-size: 0.78rem;
-      color: #aaa;
-    }
-
-    .history-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      margin-top: 4px;
-    }
-
-    .mini-ball {
-      width: 26px;
-      height: 26px;
+    .eye {
+      width: 24px;
+      height: 24px;
+      background: #111;
       border-radius: 50%;
-      font-size: 0.65rem;
-      font-weight: 700;
+      position: absolute;
+      top: 75px;
+    }
+
+    .eye.left { left: 55px; }
+    .eye.right { right: 55px; }
+
+    .nose {
+      width: 28px;
+      height: 20px;
+      background: #222;
+      border-radius: 50%;
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .mouth {
+      position: absolute;
+      top: 135px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+    }
+
+    .image-box h2 {
+      margin-top: 25px;
+      font-size: 28px;
+      color: #5b3517;
+    }
+
+    .content {
+      padding: 45px;
+    }
+
+    .content h1 {
+      font-size: 42px;
+      margin-bottom: 15px;
+      color: #3a2a1a;
+    }
+
+    .content p {
+      font-size: 18px;
+      line-height: 1.7;
+      margin-bottom: 25px;
+    }
+
+    .tag-list {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .tag {
+      background: #fff1bd;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: bold;
+      color: #6b4200;
+    }
+
+    .info-box {
+      background: #fff8ec;
+      border-left: 6px solid #ffb347;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+    }
+
+    button {
+      border: none;
+      background: #ff914d;
+      color: white;
+      padding: 15px 24px;
+      font-size: 17px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #ff7a26;
+      transform: translateY(-2px);
+    }
+
+    #message {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #d66b00;
+    }
+
+    @media (max-width: 760px) {
+      .card {
+        grid-template-columns: 1fr;
+      }
+
+      .content h1 {
+        font-size: 34px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎰 로또 추첨기</h1>
-    <p class="subtitle">한 번 클릭으로 5게임을 한꺼번에 추첨!</p>
-
-    <div class="sets-wrap" id="setsWrap">
-      <p class="placeholder">버튼을 눌러 번호를 추첨하세요</p>
+  <div class="card">
+    <div class="image-box">
+      <div class="dog-face">
+        <div class="ear left"></div>
+        <div class="ear right"></div>
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+        <div class="nose"></div>
+        <div class="mouth">ω</div>
+      </div>
+      <h2>나는 뽀식이!</h2>
     </div>
 
-    <button class="btn-draw" id="drawBtn" onclick="draw()">번호 추첨!</button>
+    <div class="content">
+      <h1>뽀식이를 소개합니다 🐶</h1>
+      <p>
+        뽀식이는 9살 푸들믹스 강아지입니다. 겁은 조금 많지만,
+        마음은 착하고 귀여운 매력을 가진 가족 같은 친구예요.
+      </p>
 
-    <div class="history" id="historySection" style="display:none;">
-      <h2>추첨 기록</h2>
-      <ul class="history-list" id="historyList"></ul>
+      <div class="tag-list">
+        <span class="tag">푸들믹스</span>
+        <span class="tag">9살 노견</span>
+        <span class="tag">천방지축</span>
+        <span class="tag">말썽쟁이</span>
+        <span class="tag">도도함</span>
+      </div>
+
+      <div class="info-box">
+        <p>
+          평소에는 말썽도 부리고 집사에게 살짝 신경질도 내지만,
+          사실은 사랑받고 싶은 애교쟁이입니다.
+        </p>
+      </div>
+
+      <button onclick="showMessage()">뽀식이 한마디 듣기</button>
+      <div id="message"></div>
     </div>
   </div>
 
   <script>
-    const historyLog = [];
+    function showMessage() {
+      const messages = [
+        "나 건드리지 마... 근데 간식은 줘.",
+        "집사야, 오늘도 내가 귀여운 건 인정하지?",
+        "산책은 좋은데 목욕은 싫어!",
+        "나는 9살이지만 아직 현역 말썽쟁이야."
+      ];
 
-    function getBallClass(num) {
-      if (num <= 10) return 'range1';
-      if (num <= 20) return 'range2';
-      if (num <= 30) return 'range3';
-      if (num <= 40) return 'range4';
-      return 'range5';
-    }
-
-    function pickNumbers() {
-      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
-      const picked = [];
-      while (picked.length < 7) {
-        const idx = Math.floor(Math.random() * pool.length);
-        picked.push(pool.splice(idx, 1)[0]);
-      }
-      return {
-        main: picked.slice(0, 6).sort((a, b) => a - b),
-        bonus: picked[6]
-      };
-    }
-
-    function makeBall(num, extraClass = '') {
-      const el = document.createElement('div');
-      el.className = `ball ${getBallClass(num)} ${extraClass}`.trim();
-      el.textContent = num;
-      return el;
-    }
-
-    function draw() {
-      const btn = document.getElementById('drawBtn');
-      const wrap = document.getElementById('setsWrap');
-      btn.disabled = true;
-      btn.textContent = '추첨 중...';
-      wrap.innerHTML = '';
-
-      const sets = Array.from({ length: 5 }, () => pickNumbers());
-
-      sets.forEach((set, si) => {
-        const row = document.createElement('div');
-        row.className = 'set-row';
-
-        const label = document.createElement('span');
-        label.className = 'set-label';
-        label.textContent = `${si + 1}게임`;
-        row.appendChild(label);
-
-        const balls = document.createElement('div');
-        balls.className = 'balls';
-
-        set.main.forEach(num => balls.appendChild(makeBall(num)));
-
-        const sep = document.createElement('span');
-        sep.className = 'bonus-sep';
-        sep.textContent = '+';
-        balls.appendChild(sep);
-
-        const bonusBall = makeBall(set.bonus, 'bonus');
-        balls.appendChild(bonusBall);
-
-        row.appendChild(balls);
-        wrap.appendChild(row);
-
-        // 행 등장 딜레이
-        setTimeout(() => {
-          row.classList.add('show');
-          // 공 하나씩 등장
-          const allBalls = row.querySelectorAll('.ball');
-          allBalls.forEach((b, bi) => {
-            setTimeout(() => b.classList.add('show'), bi * 80);
-          });
-
-          if (si === sets.length - 1) {
-            setTimeout(() => {
-              btn.disabled = false;
-              btn.textContent = '다시 추첨!';
-              saveHistory(sets);
-            }, allBalls.length * 80 + 200);
-          }
-        }, si * 180);
-      });
-    }
-
-    function saveHistory(sets) {
-      historyLog.unshift(sets);
-      if (historyLog.length > 5) historyLog.pop();
-
-      const section = document.getElementById('historySection');
-      const list = document.getElementById('historyList');
-      section.style.display = 'block';
-      list.innerHTML = '';
-
-      historyLog.forEach((sets, hi) => {
-        const li = document.createElement('li');
-        li.className = 'history-item';
-        const title = document.createElement('div');
-        title.style.marginBottom = '6px';
-        title.style.color = '#ffd32a';
-        title.textContent = `${hi === 0 ? '최근' : hi + '번 전'} 추첨`;
-        li.appendChild(title);
-
-        sets.forEach((set, si) => {
-          const row = document.createElement('div');
-          row.className = 'history-row';
-
-          const lbl = document.createElement('span');
-          lbl.style.minWidth = '36px';
-          lbl.textContent = `${si + 1}게임`;
-          row.appendChild(lbl);
-
-          set.main.forEach(num => {
-            const b = document.createElement('div');
-            b.className = `mini-ball ${getBallClass(num)}`;
-            b.textContent = num;
-            row.appendChild(b);
-          });
-
-          const sep = document.createElement('span');
-          sep.style.color = '#ffd32a';
-          sep.textContent = '+';
-          row.appendChild(sep);
-
-          const bb = document.createElement('div');
-          bb.className = 'mini-ball';
-          bb.style.background = '#636e72';
-          bb.style.border = '2px solid #ffd32a';
-          bb.textContent = set.bonus;
-          row.appendChild(bb);
-
-          li.appendChild(row);
-        });
-
-        list.appendChild(li);
-      });
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      document.getElementById("message").textContent = messages[randomIndex];
     }
   </script>
 </body>
